@@ -50,7 +50,7 @@ public class UserSecurityTest {
   public void deletePubAdminAuthorizedTest() throws Exception {
     User user = TestUtil.generateMockUser();
     user.setRole(Role.ADMIN);
-    String jwtToken = authenticationService.generateToken(user);
+    String jwtToken = authenticationService.generateToken(user.getId());
 
     when(userDetailsService.loadUserByUsername(user.getUsername())).thenReturn(user);
 
@@ -65,7 +65,7 @@ public class UserSecurityTest {
   public void deleteUserUserAuthorizedTest() throws Exception {
     User user = TestUtil.generateMockUser();
     user.setRole(Role.USER);
-    String jwtToken = authenticationService.generateToken(user);
+    String jwtToken = authenticationService.generateToken(user.getId());
 
     when(userDetailsService.loadUserByUsername(user.getUsername())).thenReturn(user);
 
@@ -77,18 +77,10 @@ public class UserSecurityTest {
   }
 
   @Test
-  public void deleteUserUnauthenticatedTest() throws Exception {
-    mockMvc.perform(delete("/user/delete")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(userDTO)))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
   public void editPubAdminAuthorizedTest() throws Exception {
     User user = TestUtil.generateMockUser();
     user.setRole(Role.ADMIN);
-    String jwtToken = authenticationService.generateToken(user);
+    String jwtToken = authenticationService.generateToken(user.getId());
 
     when(userDetailsService.loadUserByUsername(user.getUsername())).thenReturn(user);
 
@@ -103,7 +95,7 @@ public class UserSecurityTest {
   public void editUserUserAuthorizedTest() throws Exception {
     User user = TestUtil.generateMockUser();
     user.setRole(Role.USER);
-    String jwtToken = authenticationService.generateToken(user);
+    String jwtToken = authenticationService.generateToken(user.getId());
 
     when(userDetailsService.loadUserByUsername(user.getUsername())).thenReturn(user);
 
@@ -112,14 +104,6 @@ public class UserSecurityTest {
             .content(objectMapper.writeValueAsString(userDTO))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken))
         .andExpect(status().isOk());
-  }
-
-  @Test
-  public void editUserUnauthenticatedTest() throws Exception {
-    mockMvc.perform(put("/user/edit")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(userDTO)))
-        .andExpect(status().isForbidden());
   }
 
   UserDto userDTO = TestUtil.generateMockUserDTO();

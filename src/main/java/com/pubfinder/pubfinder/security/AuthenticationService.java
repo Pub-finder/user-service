@@ -4,16 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +28,7 @@ public class AuthenticationService {
   @Value("${security.jwt-refresh-expiration-ms}")
   private long REFRESHER_EXPIRATION;
 
-  public String extractUsername(String jwt) {
+  public String extractUserId(String jwt) {
     return extractClaim(jwt, Claims::getSubject);
   }
 
@@ -42,47 +40,46 @@ public class AuthenticationService {
   /**
    * Generate access token string.
    *
-   * @param userDetails the user details
+   * @param userId the users id
    * @return the string
    */
-  public String generateToken(UserDetails userDetails) {
-    return buildToken(new HashMap<>(), userDetails, JWT_EXPIRATION);
+  public String generateToken(UUID userId) {
+    return buildToken(new HashMap<>(), userId, JWT_EXPIRATION);
   }
 
   /**
    * Generate refresher token string.
    *
-   * @param userDetails the user details
+   * @param userId the users id
    * @return the string
    */
-  public String generateRefresherToken(UserDetails userDetails) {
-    return buildToken(new HashMap<>(), userDetails, REFRESHER_EXPIRATION);
+  public String generateRefresherToken(UUID userId) {
+    return buildToken(new HashMap<>(), userId, REFRESHER_EXPIRATION);
   }
-
 
   /**
    * Build token string.
    *
    * @param extractClaims the extracted claims
-   * @param userDetails   the user details
+   * @param id   the user id
    * @param exertionTime  the exertion time
    * @return the string
    */
-  public String buildToken(Map<String, Object> extractClaims, UserDetails userDetails,
+  public String buildToken(Map<String, Object> extractClaims, UUID id,
       long exertionTime) {
     return Jwts
         .builder()
         .claims(extractClaims)
-        .subject(userDetails.getUsername())
+        .subject(id.toString())
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(new Date(System.currentTimeMillis() + exertionTime))
         .signWith(getSignInKey(), Jwts.SIG.HS256)
         .compact();
   }
 
-  public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+  public boolean isTokenValid(String token, UUID userId) {
+    final String id = extractUserId(token);
+    return userId.toString().equals(id) && !isTokenExpired(token);
   }
 
   private boolean isTokenExpired(String token) {

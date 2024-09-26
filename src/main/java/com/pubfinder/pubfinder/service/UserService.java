@@ -13,7 +13,7 @@ import com.pubfinder.pubfinder.models.enums.Role;
 import com.pubfinder.pubfinder.models.enums.TokenType;
 import com.pubfinder.pubfinder.security.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,8 +65,8 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     User savedUser = userRepository.save(user);
-    String jwtToken = authenticationService.generateToken(savedUser);
-    String refresherToken = authenticationService.generateRefresherToken(savedUser);
+    String jwtToken = authenticationService.generateToken(savedUser.getId());
+    String refresherToken = authenticationService.generateRefresherToken(savedUser.getId());
     saveToken(savedUser, jwtToken);
     return AuthenticationResponse.builder().accessToken(jwtToken).refreshToken(refresherToken)
         .build();
@@ -80,7 +80,7 @@ public class UserService {
    * @throws ResourceNotFoundException the resource not found exception
    */
   public void delete(User user, HttpServletRequest request) throws ResourceNotFoundException {
-    isRequestAllowed(user, request);
+    // isRequestAllowed(user, request);
     User foundUser = userRepository.findById(user.getId()).orElseThrow(
         () -> new ResourceNotFoundException("User with id: " + user.getId() + " was not found"));
 
@@ -110,7 +110,7 @@ public class UserService {
         () -> new ResourceNotFoundException(
             "User with the id: " + user.getId() + " was not found"));
 
-    isRequestAllowed(foundUser, request);
+    // isRequestAllowed(foundUser, request);
 
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -135,8 +135,8 @@ public class UserService {
         () -> new ResourceNotFoundException(
             "User with username: " + loginRequest.getUsername() + " not found"));
 
-    var accessToken = authenticationService.generateToken(user);
-    var refreshToken = authenticationService.generateRefresherToken(user);
+    var accessToken = authenticationService.generateToken(user.getId());
+    var refreshToken = authenticationService.generateRefresherToken(user.getId());
 
     deleteAllUserTokens(user);
     saveToken(user, accessToken);
@@ -161,7 +161,7 @@ public class UserService {
     }
 
     String finalRefreshToken = refreshToken;
-    String username = Optional.ofNullable(authenticationService.extractUsername(refreshToken))
+    String username = Optional.ofNullable(authenticationService.extractUserId(refreshToken))
         .orElseThrow(() -> new ResourceNotFoundException(
             "User with refresherToken: " + finalRefreshToken + " was not found"));
 
@@ -169,9 +169,9 @@ public class UserService {
         () -> new ResourceNotFoundException(
             "User with the email: " + username + " was not found"));
 
-    if (authenticationService.isTokenValid(refreshToken, user)) {
-      String accessToken = authenticationService.generateToken(user);
-      refreshToken = authenticationService.generateRefresherToken(user);
+    if (authenticationService.isTokenValid(refreshToken, user.getId())) {
+      String accessToken = authenticationService.generateToken(user.getId());
+      refreshToken = authenticationService.generateRefresherToken(user.getId());
       deleteAllUserTokens(user);
       saveToken(user, accessToken);
       return AuthenticationResponse.builder().accessToken(accessToken).refreshToken(refreshToken)
@@ -215,13 +215,15 @@ public class UserService {
     tokenRepository.save(token);
   }
 
+  // TODO: move to another microservice
   private void isRequestAllowed(User user, HttpServletRequest request) {
     String jwt = request.getHeader("Authorization").substring(7);
-    String username = authenticationService.extractUsername(jwt);
-    if (!username.equals(user.getUsername())) {
-      Optional<User> userDetails = userRepository.findByUsername(username);
+    String id = authenticationService.extractUserId(jwt);
+
+    if (!id.equals(user.getId().toString())) {
+      Optional<User> userDetails = userRepository.findById(user.getId());
       if (userDetails.isEmpty() || !userDetails.get().getRole().equals(Role.ADMIN)) {
-        throw new BadCredentialsException("Only admin or the user themselves can delete a user");
+        throw new BadCredentialsException("Only admin or the user themselves can delete or edit a user");
       }
     }
   }

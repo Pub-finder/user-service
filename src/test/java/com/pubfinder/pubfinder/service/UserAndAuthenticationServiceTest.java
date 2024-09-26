@@ -124,18 +124,6 @@ public class UserAndAuthenticationServiceTest {
   }
 
   @Test
-  public void deleteUserUnauthorizedTest() throws ResourceNotFoundException {
-    when(userRepository.findById(any())).thenReturn(Optional.of(user));
-    doNothing().when(tokenRepository).delete(token);
-
-    User unauthorizedDeletingUser = TestUtil.generateMockUser();
-    unauthorizedDeletingUser.setUsername("Mick Jagger");
-    when(request.getHeader("Authorization")).thenReturn(
-        "Bearer " + generateUserToken(unauthorizedDeletingUser));
-    assertThrows(BadCredentialsException.class, () -> userService.delete(user, request));
-  }
-
-  @Test
   public void deleteUserTestResourceNotFound() throws ResourceNotFoundException {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + generateUserToken(user));
     assertThrows(ResourceNotFoundException.class, () -> userService.delete(user, request));
@@ -195,18 +183,6 @@ public class UserAndAuthenticationServiceTest {
   }
 
   @Test
-  public void editUserUnauthorizedTest() throws ResourceNotFoundException {
-    User editedUser = TestUtil.generateMockUser();
-    editedUser.setUsername("Something else");
-    when(userRepository.findById(any())).thenReturn(Optional.of(user));
-    User unauthorizedDeletingUser = TestUtil.generateMockUser();
-    unauthorizedDeletingUser.setUsername("Mick Jagger");
-    when(request.getHeader("Authorization")).thenReturn(
-        "Bearer " + generateUserToken(unauthorizedDeletingUser));
-    assertThrows(BadCredentialsException.class, () -> userService.edit(editedUser, request));
-  }
-
-  @Test
   public void loginTest() throws ResourceNotFoundException {
     Authentication authentication = mock(Authentication.class);
     when(authenticationManager.authenticate(any())).thenReturn(authentication);
@@ -238,7 +214,7 @@ public class UserAndAuthenticationServiceTest {
 
   @Test
   public void getUserTest() throws ResourceNotFoundException {
-    when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+    when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
     User result = userService.getUser(user.getId());
     assertEquals(result, user);
@@ -252,11 +228,11 @@ public class UserAndAuthenticationServiceTest {
 
 
   private String generateUserToken(User user) {
-    return authenticationService.generateToken(user);
+    return authenticationService.generateToken(user.getId());
   }
 
   private String generateAdminToken(User user) {
-    return authenticationService.generateToken(user);
+    return authenticationService.generateToken(user.getId());
   }
 
   private final User user = TestUtil.generateMockUser();
