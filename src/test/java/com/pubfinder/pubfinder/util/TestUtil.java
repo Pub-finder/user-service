@@ -1,6 +1,5 @@
 package com.pubfinder.pubfinder.util;
 
-import com.pubfinder.pubfinder.dto.AuthenticationResponse;
 import com.pubfinder.pubfinder.dto.UserDto;
 import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
@@ -55,15 +54,6 @@ public class TestUtil {
     token3.setToken("token3");
 
     return List.of(token1, token2, token3);
-  }
-
-  public static AuthenticationResponse generateMockAuthenticationResponse() {
-    return AuthenticationResponse.builder()
-        .accessToken(
-            "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImlhdCI6MTcxMTU2ODQ1MiwiZXhwIjoxNzExNTczODUyfQ.zcLczdIhND1hnJMQvT4OMRzqTdBTw76O6Wb70uSzRks")
-        .refreshToken(
-            "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VybmFtZSIsImlhdCI6MTcxMTU2ODQ1MiwiZXhwIjoxNzExNjU0ODUyfQ.SSezTPT73RI03rM109o2Geetr1jHzOZgZoJR4qTLa-U")
-        .build();
   }
 
 }

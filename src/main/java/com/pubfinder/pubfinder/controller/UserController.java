@@ -1,7 +1,6 @@
 package com.pubfinder.pubfinder.controller;
 
-import com.pubfinder.pubfinder.dto.AuthenticationResponse;
-import com.pubfinder.pubfinder.dto.LoginRequest;
+
 import com.pubfinder.pubfinder.dto.UserDto;
 import com.pubfinder.pubfinder.exception.ResourceNotFoundException;
 import com.pubfinder.pubfinder.mapper.Mapper;
@@ -27,11 +26,10 @@ public class UserController {
   private UserService userService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticationResponse> registerUser(@RequestBody UserDto registerRequest)
+  public ResponseEntity<Void> registerUser(@RequestBody UserDto registerRequest)
       throws BadRequestException {
-    AuthenticationResponse response = userService.registerUser(
-        Mapper.INSTANCE.dtoToEntity(registerRequest));
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    userService.registerUser(Mapper.INSTANCE.dtoToEntity(registerRequest));
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @DeleteMapping("/delete")
@@ -48,16 +46,10 @@ public class UserController {
         .body(userService.edit(Mapper.INSTANCE.dtoToEntity(userDTO), request));
   }
 
-  @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest)
-      throws ResourceNotFoundException {
-    return ResponseEntity.ok(userService.login(loginRequest));
-  }
-
-  @PostMapping("/revokeUserAccess")
-  public ResponseEntity<Void> revokeUserAccess(@PathVariable String email) {
-    userService.revokeUserAccess(email);
-    return ResponseEntity.ok().build();
+  @DeleteMapping("/revokeUserAccess/{id}")
+  public ResponseEntity<Void> revokeUserAccess(@PathVariable UUID id) throws ResourceNotFoundException {
+    userService.revokeUserAccess(id);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/{id}")
