@@ -52,9 +52,6 @@ public class UserServiceTest {
   @MockBean
   private HttpServletRequest request;
 
-  @MockBean
-  private UserDetailsService userDetailsService;
-
   @Test
   public void registerUserTest() throws BadRequestException {
     when(userRepository.findByEmail(any())).thenReturn(Optional.empty());

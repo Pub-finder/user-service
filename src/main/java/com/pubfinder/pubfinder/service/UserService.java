@@ -40,7 +40,7 @@ public class UserService {
    * @param user the user
    * @throws BadRequestException user with the same email or/and username already exists
    */
-  public void registerUser(User user) throws BadRequestException {
+  public UUID registerUser(User user) throws BadRequestException {
     if (userRepository.findByEmail(user.getEmail()).isPresent() || userRepository.findByUsername(
         user.getUsername()).isPresent()) {
       throw new BadRequestException();
@@ -49,6 +49,7 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     User savedUser = userRepository.save(user);
+    return savedUser.getId();
   }
 
   /**

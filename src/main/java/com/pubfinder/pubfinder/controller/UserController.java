@@ -22,40 +22,42 @@ import java.util.UUID;
 @RequestMapping("/user")
 public class UserController {
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @PostMapping("/register")
-  public ResponseEntity<Void> registerUser(@RequestBody UserDto registerRequest)
-      throws BadRequestException {
-    userService.registerUser(Mapper.INSTANCE.dtoToEntity(registerRequest));
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
+    @PostMapping("/register")
+    public ResponseEntity<Void> registerUser(@RequestBody UserDto registerRequest)
+            throws BadRequestException {
+        UUID userId = userService.registerUser(Mapper.INSTANCE.dtoToEntity(registerRequest));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("X-User-Id", userId.toString())
+                .build();
+    }
 
-  @DeleteMapping("/delete")
-  public ResponseEntity<String> delete(@RequestBody UserDto user, HttpServletRequest request)
-      throws ResourceNotFoundException {
-    userService.delete(Mapper.INSTANCE.dtoToEntity(user), request);
-    return ResponseEntity.noContent().build();
-  }
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> delete(@RequestBody UserDto user, HttpServletRequest request)
+            throws ResourceNotFoundException {
+        userService.delete(Mapper.INSTANCE.dtoToEntity(user), request);
+        return ResponseEntity.noContent().build();
+    }
 
-  @PutMapping("/edit")
-  public ResponseEntity<UserDto> edit(@RequestBody UserDto userDTO, HttpServletRequest request)
-      throws BadRequestException, ResourceNotFoundException {
-    return ResponseEntity.ok()
-        .body(userService.edit(Mapper.INSTANCE.dtoToEntity(userDTO), request));
-  }
+    @PutMapping("/edit")
+    public ResponseEntity<UserDto> edit(@RequestBody UserDto userDTO, HttpServletRequest request)
+            throws BadRequestException, ResourceNotFoundException {
+        return ResponseEntity.ok()
+                .body(userService.edit(Mapper.INSTANCE.dtoToEntity(userDTO), request));
+    }
 
-  @DeleteMapping("/revokeUserAccess/{id}")
-  public ResponseEntity<Void> revokeUserAccess(@PathVariable UUID id) throws ResourceNotFoundException {
-    userService.revokeUserAccess(id);
-    return ResponseEntity.noContent().build();
-  }
+    @DeleteMapping("/revokeUserAccess/{id}")
+    public ResponseEntity<Void> revokeUserAccess(@PathVariable UUID id) throws ResourceNotFoundException {
+        userService.revokeUserAccess(id);
+        return ResponseEntity.noContent().build();
+    }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<UserDto> getUser(@PathVariable UUID id) throws ResourceNotFoundException {
-    User user = userService.getUser(id);
-    return ResponseEntity.ok(Mapper.INSTANCE.entityToDto(user));
-  }
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable UUID id) throws ResourceNotFoundException {
+        User user = userService.getUser(id);
+        return ResponseEntity.ok(Mapper.INSTANCE.entityToDto(user));
+    }
 
 }

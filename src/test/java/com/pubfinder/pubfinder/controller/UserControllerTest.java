@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -38,12 +39,12 @@ public class UserControllerTest {
 
     @Test
     public void registerUserTest() throws Exception {
-        doNothing().when(userService).registerUser(any());
+        when(userService.registerUser(any())).thenReturn(user.getId());
 
         mockMvc.perform(post("/user/register", user)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andExpect(header().exists("X-User-Id"));
     }
 
     @Test
