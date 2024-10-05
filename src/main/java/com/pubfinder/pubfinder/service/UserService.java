@@ -7,17 +7,15 @@ import com.pubfinder.pubfinder.exception.ResourceNotFoundException;
 import com.pubfinder.pubfinder.mapper.Mapper;
 import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
-import com.pubfinder.pubfinder.models.enums.TokenType;
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.List;
-import java.util.UUID;
-
+import com.pubfinder.pubfinder.models.enums.Role;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * The type User service.
@@ -46,6 +44,7 @@ public class UserService {
       throw new BadRequestException();
     }
 
+    user.setRole(Role.ADMIN);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     User savedUser = userRepository.save(user);
@@ -56,10 +55,9 @@ public class UserService {
    * Delete user, tokens, reviews and visits.
    *
    * @param user    the user
-   * @param request the request
    * @throws ResourceNotFoundException the resource not found exception
    */
-  public void delete(User user, HttpServletRequest request) throws ResourceNotFoundException {
+  public void delete(User user) throws ResourceNotFoundException {
     // isRequestAllowed(user, request);
     User foundUser = userRepository.findById(user.getId()).orElseThrow(
         () -> new ResourceNotFoundException("User with id: " + user.getId() + " was not found"));
@@ -75,12 +73,11 @@ public class UserService {
    * Edit user. Only admin or the user themselves can edit the object
    *
    * @param user    the user
-   * @param request the request
    * @return the user dto
    * @throws BadRequestException       the user param is empty exception
    * @throws ResourceNotFoundException the user not found exception
    */
-  public UserDto edit(User user, HttpServletRequest request)
+  public UserDto edit(User user)
       throws BadRequestException, ResourceNotFoundException {
     if (user == null) {
       throw new BadRequestException();

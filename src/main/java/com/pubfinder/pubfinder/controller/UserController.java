@@ -6,7 +6,6 @@ import com.pubfinder.pubfinder.exception.ResourceNotFoundException;
 import com.pubfinder.pubfinder.mapper.Mapper;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,17 +34,17 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> delete(@RequestBody UserDto user, HttpServletRequest request)
+    public ResponseEntity<String> delete(@RequestBody UserDto user)
             throws ResourceNotFoundException {
-        userService.delete(Mapper.INSTANCE.dtoToEntity(user), request);
+        userService.delete(Mapper.INSTANCE.dtoToEntity(user));
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<UserDto> edit(@RequestBody UserDto userDTO, HttpServletRequest request)
+    public ResponseEntity<UserDto> edit(@RequestBody UserDto userDTO)
             throws BadRequestException, ResourceNotFoundException {
         return ResponseEntity.ok()
-                .body(userService.edit(Mapper.INSTANCE.dtoToEntity(userDTO), request));
+                .body(userService.edit(Mapper.INSTANCE.dtoToEntity(userDTO)));
     }
 
     @DeleteMapping("/revokeUserAccess/{id}")

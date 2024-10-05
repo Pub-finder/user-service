@@ -1,13 +1,5 @@
 package com.pubfinder.pubfinder.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.pubfinder.pubfinder.db.TokenRepository;
 import com.pubfinder.pubfinder.db.UserRepository;
 import com.pubfinder.pubfinder.dto.UserDto;
@@ -17,16 +9,20 @@ import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.util.TestUtil;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.List;
-import java.util.Optional;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(properties = {
     "spring.cache.type=none",
@@ -64,7 +60,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void registerUserTestBadRequest() throws BadRequestException {
+  public void registerUserTestBadRequest() {
     when(userRepository.findByEmail(any())).thenReturn(Optional.ofNullable(user));
     assertThrows(BadRequestException.class, () -> userService.registerUser(user));
   }
@@ -76,7 +72,7 @@ public class UserServiceTest {
     when(tokenRepository.findAllTokensByUser(user.getId())).thenReturn(List.of(token));
     doNothing().when(tokenRepository).delete(token);
 
-    userService.delete(user, request);
+    userService.delete(user);
     verify(userRepository, times(1)).findById(any());
     verify(userRepository, times(1)).delete(any());
     verify(tokenRepository, times(1)).findAllTokensByUser(any());
@@ -84,9 +80,9 @@ public class UserServiceTest {
   }
 
   @Test
-  public void deleteUserTestResourceNotFound() throws ResourceNotFoundException {
+  public void deleteUserTestResourceNotFound() {
     when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> userService.delete(user, request));
+    assertThrows(ResourceNotFoundException.class, () -> userService.delete(user));
     verify(userRepository, times(1)).findById(any());
   }
 
@@ -100,20 +96,20 @@ public class UserServiceTest {
     when(tokenRepository.findAllTokensByUser(user.getId())).thenReturn(List.of(token));
     doNothing().when(tokenRepository).delete(token);
 
-    UserDto result = userService.edit(editedUser, request);
+    UserDto result = userService.edit(editedUser);
     assertEquals(Mapper.INSTANCE.entityToDto(editedUser), result);
     verify(userRepository, times(1)).save(editedUser);
   }
 
   @Test
   public void editUserTestBadRequest() {
-    assertThrows(BadRequestException.class, () -> userService.edit(null, request));
+    assertThrows(BadRequestException.class, () -> userService.edit(null));
   }
 
   @Test
   public void editUserTestResourceNotFound() {
     when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
-    assertThrows(ResourceNotFoundException.class, () -> userService.edit(user, request));
+    assertThrows(ResourceNotFoundException.class, () -> userService.edit(user));
   }
 
   @Test
@@ -128,7 +124,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void revokeUserAccessTestResourceNotFound() throws ResourceNotFoundException {
+  public void revokeUserAccessTestResourceNotFound() {
     when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
     assertThrows(ResourceNotFoundException.class, () -> userService.revokeUserAccess(user.getId()));
   }
@@ -142,7 +138,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void getUserTest_NotFound() throws ResourceNotFoundException {
+  public void getUserTest_NotFound() {
     when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
     assertThrows(ResourceNotFoundException.class, () -> userService.getUser(user.getId()));
   }

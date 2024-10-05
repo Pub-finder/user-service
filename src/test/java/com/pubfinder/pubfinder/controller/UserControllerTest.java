@@ -49,7 +49,7 @@ public class UserControllerTest {
 
     @Test
     public void deleteUserTest() throws Exception {
-        doNothing().when(userService).delete(any(), any());
+        doNothing().when(userService).delete(any());
         mockMvc.perform(delete("/user/delete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -58,7 +58,7 @@ public class UserControllerTest {
 
     @Test
     public void editUserTest() throws Exception {
-        when(userService.edit(any(), any())).thenReturn(TestUtil.generateMockUserDTO());
+        when(userService.edit(any())).thenReturn(TestUtil.generateMockUserDTO());
         mockMvc.perform(put("/user/edit", TestUtil.generateMockUserDTO())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
