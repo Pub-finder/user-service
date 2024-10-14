@@ -39,9 +39,12 @@ public class UserService {
    * @throws BadRequestException user with the same email or/and username already exists
    */
   public UUID registerUser(User user) throws BadRequestException {
-    if (userRepository.findByEmail(user.getEmail()).isPresent() || userRepository.findByUsername(
-        user.getUsername()).isPresent()) {
-      throw new BadRequestException();
+    if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+      throw new BadRequestException("An account with the email address '" + user.getEmail() + "' already exists. Please use a different email.");
+    }
+
+    if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+      throw new BadRequestException("The username '" + user.getUsername() + "' is already taken. Please choose a different username.");
     }
 
     user.setRole(Role.ADMIN);

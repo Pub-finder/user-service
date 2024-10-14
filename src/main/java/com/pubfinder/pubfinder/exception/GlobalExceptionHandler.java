@@ -20,7 +20,10 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(value = BadRequestException.class)
   public ResponseEntity<String> handleBadRequestException(BadRequestException ex) {
     // Log exception Message
-    return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
+    if (ex.getMessage().isEmpty())
+      return new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST);
+    else
+      return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(value = BadCredentialsException.class)
