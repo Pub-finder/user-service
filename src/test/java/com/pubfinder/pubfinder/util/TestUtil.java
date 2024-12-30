@@ -1,5 +1,6 @@
 package com.pubfinder.pubfinder.util;
 
+import com.pubfinder.pubfinder.dto.FollowDto;
 import com.pubfinder.pubfinder.dto.UserDto;
 import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
@@ -12,7 +13,7 @@ public class TestUtil {
 
   public static User generateMockUser() {
     return User.builder()
-        .id(UUID.randomUUID())
+        .id(null)
         .firstname("firstName")
         .lastname("lastName")
         .email("email")
@@ -30,6 +31,8 @@ public class TestUtil {
         .email("email")
         .username("username")
         .password("password")
+        .followers(List.of())
+        .following(List.of())
         .build();
   }
 
@@ -54,6 +57,13 @@ public class TestUtil {
     token3.setToken("token3");
 
     return List.of(token1, token2, token3);
+  }
+
+  public static FollowDto generateFollowDto(User user, User utf) {
+    return FollowDto.builder()
+            .userId(user.getId())
+            .followId(utf.getId())
+            .build();
   }
 
 }

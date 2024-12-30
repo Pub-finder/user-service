@@ -2,17 +2,19 @@ package com.pubfinder.pubfinder.service;
 
 import com.pubfinder.pubfinder.db.TokenRepository;
 import com.pubfinder.pubfinder.db.UserRepository;
+import com.pubfinder.pubfinder.dto.FollowDto;
 import com.pubfinder.pubfinder.dto.UserDto;
+import com.pubfinder.pubfinder.exception.BadRequestException;
 import com.pubfinder.pubfinder.exception.ResourceNotFoundException;
 import com.pubfinder.pubfinder.mapper.Mapper;
 import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.models.enums.Role;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +83,7 @@ public class UserService {
    * @throws ResourceNotFoundException the user not found exception
    */
   public UserDto edit(User user)
-      throws BadRequestException, ResourceNotFoundException {
+      throws HttpClientErrorException.BadRequest, ResourceNotFoundException {
     if (user == null) {
       throw new BadRequestException();
     }
@@ -89,8 +91,6 @@ public class UserService {
     User foundUser = userRepository.findById(user.getId()).orElseThrow(
         () -> new ResourceNotFoundException(
             "User with the id: " + user.getId() + " was not found"));
-
-    // isRequestAllowed(foundUser, request);
 
     user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -119,9 +119,10 @@ public class UserService {
    * @throws ResourceNotFoundException the user not found exception
    */
   @Cacheable(value = "getUser")
-  public User getUser(UUID id) throws ResourceNotFoundException {
-    return userRepository.findById(id)
+  public UserDto getUser(UUID id) throws ResourceNotFoundException {
+    User user = userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User with id: " + id + " was not found"));
+    return Mapper.INSTANCE.entityToDto(user);
   }
 
   private void deleteAllUserTokens(User user) {
@@ -129,18 +130,27 @@ public class UserService {
     tokens.forEach((token -> tokenRepository.delete(token)));
   }
 
-  // TODO: move to another microservice
-  /*
-  private void isRequestAllowed(User user, HttpServletRequest request) {
-    String jwt = request.getHeader("Authorization").substring(7);
-    // String id = authenticationService.extractUserId(jwt);
+  public UserDto follow(FollowDto followDto) throws ResourceNotFoundException {
+    User user = userRepository.findById(followDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User with id: " + followDto.getUserId() + " was not found"));
+    User userToFollow = userRepository.findById(followDto.getFollowId()).orElseThrow(() -> new ResourceNotFoundException("User with id: " + followDto.getUserId() + " was not found"));
+    user.addFollowing(userToFollow);
 
-    if (!id.equals(user.getId().toString())) {
-      Optional<User> userDetails = userRepository.findById(user.getId());
-      if (userDetails.isEmpty() || !userDetails.get().getRole().equals(Role.ADMIN)) {
-        throw new BadCredentialsException("Only admin or the user themselves can delete or edit a user");
-      }
-    }
+    userRepository.save(userToFollow);
+    return Mapper.INSTANCE.entityToDto(userRepository.save(user));
   }
-  */
+
+  // TODO: add a cache maybe
+  public List<UserDto> getFollowers(UUID id) throws ResourceNotFoundException {
+    User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User with id: " + id + " was not found"));
+    return user.getFollowers().stream().map(Mapper.INSTANCE::entityToDto).toList();
+  }
+
+  public void unfollow(FollowDto followDto) throws ResourceNotFoundException {
+    User user = userRepository.findById(followDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User with id: " + followDto.getUserId() + " was not found"));
+    User userToUnfollow = userRepository.findById(followDto.getFollowId()).orElseThrow(() -> new ResourceNotFoundException("User with id: " + followDto.getUserId() + " was not found"));
+    user.removeFollowing(userToUnfollow);
+
+    userRepository.save(user);
+    userRepository.save(userToUnfollow);
+  }
 }
