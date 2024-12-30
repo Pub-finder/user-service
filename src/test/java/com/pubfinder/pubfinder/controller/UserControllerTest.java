@@ -1,34 +1,34 @@
 package com.pubfinder.pubfinder.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pubfinder.pubfinder.dto.FollowDto;
 import com.pubfinder.pubfinder.dto.UserDto;
+import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.service.UserService;
 import com.pubfinder.pubfinder.util.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
     @Autowired
@@ -44,7 +44,8 @@ public class UserControllerTest {
         mockMvc.perform(post("/user/register", user)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isCreated()).andExpect(header().exists("X-User-Id"));
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("X-User-Id"));
     }
 
     @Test
@@ -59,7 +60,7 @@ public class UserControllerTest {
     @Test
     public void editUserTest() throws Exception {
         when(userService.edit(any())).thenReturn(TestUtil.generateMockUserDTO());
-        mockMvc.perform(put("/user/edit", TestUtil.generateMockUserDTO())
+        mockMvc.perform(put("/user/edit")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk());
@@ -75,12 +76,46 @@ public class UserControllerTest {
 
     @Test
     public void getUserTest() throws Exception {
-        when(userService.getUser(user.getId())).thenReturn(TestUtil.generateMockUser());
+        when(userService.getUser(user.getId())).thenReturn(TestUtil.generateMockUserDTO());
         mockMvc.perform(get("/user/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void followTest() throws Exception {
+        User u = TestUtil.generateMockUser();
+        User utf = TestUtil.generateMockUser();
+        FollowDto followDto = TestUtil.generateFollowDto(u, utf);
+
+        when(userService.follow(followDto)).thenReturn(user);
+        mockMvc.perform(post("/user/follow")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(followDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void unfollowTest() throws Exception {
+        User u = TestUtil.generateMockUser();
+        User utf = TestUtil.generateMockUser();
+        FollowDto followDto = TestUtil.generateFollowDto(u, utf);
+
+        doNothing().when(userService).unfollow(any());
+        mockMvc.perform(post("/user/unfollow")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(followDto)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getFollowersTest() throws Exception {
+        UserDto utfDto = TestUtil.generateMockUserDTO();
+        when(userService.getFollowers(user.getId())).thenReturn(List.of(utfDto));
+        mockMvc.perform(get("/user/{id}/followers", user.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
     UserDto user = TestUtil.generateMockUserDTO();
 }

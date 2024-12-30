@@ -21,8 +21,12 @@ public class MapperTest {
   @Test
   public void mapUserEntityToDtoTest() {
     User user = TestUtil.generateMockUser();
+    for (int i=0;i<10;i++) {
+      user.addFollowing(TestUtil.generateMockUser());
+    }
     UserDto userDTO = Mapper.INSTANCE.entityToDto(user);
     checkUser(userDTO, user);
+    assertEquals(userDTO.getFollowers().size(), user.getFollowers().size());
   }
 
 

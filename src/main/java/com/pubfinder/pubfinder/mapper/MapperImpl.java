@@ -4,6 +4,8 @@ import com.pubfinder.pubfinder.dto.UserDto;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.models.enums.Role;
 
+import java.util.List;
+
 public class MapperImpl implements Mapper {
 
 
@@ -19,6 +21,8 @@ public class MapperImpl implements Mapper {
         .lastname(entity.getLastname())
         .email(entity.getEmail())
         .password(entity.getPassword())
+        .following(entity.getFollowing().stream().map(this::entityToDtoWithoutRelationship).toList())
+        .followers(entity.getFollowers().stream().map(this::entityToDtoWithoutRelationship).toList())
         .build();
   }
 
@@ -37,5 +41,21 @@ public class MapperImpl implements Mapper {
         .password(dto.getPassword())
         .role(Role.USER)
         .build();
+  }
+
+  private UserDto entityToDtoWithoutRelationship(User entity) {
+    if (entity == null) {
+      return null;
+    }
+    return UserDto.builder()
+            .id(entity.getId())
+            .username(entity.getUsername())
+            .firstname(entity.getFirstname())
+            .lastname(entity.getLastname())
+            .email(entity.getEmail())
+            .password(entity.getPassword())
+            .following(List.of())
+            .followers(List.of())
+            .build();
   }
 }
