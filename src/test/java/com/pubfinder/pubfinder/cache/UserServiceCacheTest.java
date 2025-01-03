@@ -36,9 +36,9 @@ public class UserServiceCacheTest {
         UUID id2 = UUID.randomUUID();
 
         when(userRepository.findById(id1)).thenReturn(
-                Optional.ofNullable(TestUtil.generateMockUser()));
+                Optional.ofNullable(TestUtil.generateMockUser(id1)));
         when(userRepository.findById(id2)).thenReturn(
-                Optional.ofNullable(TestUtil.generateMockUser()));
+                Optional.ofNullable(TestUtil.generateMockUser(id2)));
 
         userService.getUser(id1);
         userService.getUser(id2);
@@ -52,7 +52,7 @@ public class UserServiceCacheTest {
         UUID id = UUID.randomUUID();
 
         when(userRepository.findById(id)).thenReturn(
-                Optional.ofNullable(TestUtil.generateMockUser()));
+                Optional.ofNullable(TestUtil.generateMockUser(id)));
 
         UserDto result1 = userService.getUser(id);
         UserDto result2 = userService.getUser(id);

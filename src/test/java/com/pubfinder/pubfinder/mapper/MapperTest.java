@@ -9,6 +9,8 @@ import com.pubfinder.pubfinder.util.TestUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
+
 @SpringBootTest(properties = {
     "spring.cache.type=none",
     "bucket4j.enabled=false",
@@ -20,9 +22,9 @@ public class MapperTest {
 
   @Test
   public void mapUserEntityToDtoTest() {
-    User user = TestUtil.generateMockUser();
+    User user = TestUtil.generateMockUser(UUID.randomUUID());
     for (int i=0;i<10;i++) {
-      user.addFollowing(TestUtil.generateMockUser());
+      user.addFollowing(TestUtil.generateMockUser(UUID.randomUUID()));
     }
     UserDto userDTO = Mapper.INSTANCE.entityToDto(user);
     checkUser(userDTO, user);

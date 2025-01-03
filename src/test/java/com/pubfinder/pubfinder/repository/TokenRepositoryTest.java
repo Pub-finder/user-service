@@ -10,6 +10,8 @@ import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.util.TestUtil;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -30,7 +32,7 @@ public class TokenRepositoryTest {
 
   @Test
   public void saveAndGetTokenTest() {
-    User user = userRepository.save(TestUtil.generateMockUser());
+    User user = userRepository.save(TestUtil.generateMockUser(null));
     Token savedToken = tokenRepository.save(TestUtil.generateMockToken(user));
     Optional<Token> foundToken = tokenRepository.findByToken(savedToken.getToken());
 
@@ -42,7 +44,7 @@ public class TokenRepositoryTest {
 
   @Test
   public void deleteTokenTest() {
-    User user = userRepository.save(TestUtil.generateMockUser());
+    User user = userRepository.save(TestUtil.generateMockUser(null));
     Token savedToken = tokenRepository.save(TestUtil.generateMockToken(user));
     tokenRepository.delete(savedToken);
     Optional<Token> token = tokenRepository.findById(savedToken.getId());
@@ -51,7 +53,7 @@ public class TokenRepositoryTest {
 
   @Test
   public void editTokenTest() {
-    User user = userRepository.save(TestUtil.generateMockUser());
+    User user = userRepository.save(TestUtil.generateMockUser(null));
     Token savedToken = tokenRepository.save(TestUtil.generateMockToken(user));
     savedToken.setRevoked(true);
     Token editedToken = tokenRepository.save(savedToken);
@@ -60,7 +62,7 @@ public class TokenRepositoryTest {
 
   @Test
   public void findAllTokensByUserTest() {
-    User user = userRepository.save(TestUtil.generateMockUser());
+    User user = userRepository.save(TestUtil.generateMockUser(null));
 
     tokenRepository.saveAll(TestUtil.generateListOfMockedTokens(user));
     List<Token> foundTokens = tokenRepository.findAllTokensByUser(user.getId());

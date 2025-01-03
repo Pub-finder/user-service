@@ -11,7 +11,6 @@ import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.util.TestUtil;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,7 +90,7 @@ public class UserServiceTest {
 
     @Test
     public void editUserTest() throws BadRequestException, ResourceNotFoundException {
-        User editedUser = TestUtil.generateMockUser();
+        User editedUser = TestUtil.generateMockUser(UUID.randomUUID());
         editedUser.setUsername("Something else");
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(editedUser);
@@ -147,7 +147,7 @@ public class UserServiceTest {
 
     @Test
     public void followTest() throws ResourceNotFoundException {
-        User utf = TestUtil.generateMockUser();
+        User utf = TestUtil.generateMockUser(UUID.randomUUID());
         FollowDto followDto = TestUtil.generateFollowDto(user, utf);
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -164,8 +164,7 @@ public class UserServiceTest {
 
     @Test
     public void followTest_NotFound() {
-        User user = TestUtil.generateMockUser();
-        User utf = TestUtil.generateMockUser();
+        User utf = TestUtil.generateMockUser(UUID.randomUUID());
 
         FollowDto followDto = FollowDto.builder()
                 .userId(user.getId())
@@ -178,13 +177,9 @@ public class UserServiceTest {
 
     @Test
     public void getFollowers() throws ResourceNotFoundException {
-        User user = TestUtil.generateMockUser();
-        /*
         for (int i = 0; i < 10; i++) {
-            user.getFollowers().add(TestUtil.generateMockUser());
+            user.getFollowers().add(TestUtil.generateMockUser(UUID.randomUUID()));
         }
-
-         */
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         List<UserDto> followers = userService.getFollowers(user.getId());
@@ -194,14 +189,13 @@ public class UserServiceTest {
 
     @Test
     public void getFollowers_NotFound() {
-        User user = TestUtil.generateMockUser();
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.getFollowers(user.getId()));
     }
 
     @Test
     public void unFollowers() throws ResourceNotFoundException {
-        User utuf = TestUtil.generateMockUser();
+        User utuf = TestUtil.generateMockUser(UUID.randomUUID());
         FollowDto followDto = TestUtil.generateFollowDto(user, utuf);
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -216,6 +210,6 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(utuf);
     }
 
-    private final User user = TestUtil.generateMockUser();
+    private final User user = TestUtil.generateMockUser(UUID.randomUUID());
     private final Token token = TestUtil.generateMockToken(user);
 }

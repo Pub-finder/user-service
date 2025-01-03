@@ -84,8 +84,8 @@ public class UserControllerTest {
 
     @Test
     public void followTest() throws Exception {
-        User u = TestUtil.generateMockUser();
-        User utf = TestUtil.generateMockUser();
+        User u = TestUtil.generateMockUser(UUID.randomUUID());
+        User utf = TestUtil.generateMockUser(UUID.randomUUID());
         FollowDto followDto = TestUtil.generateFollowDto(u, utf);
 
         when(userService.follow(followDto)).thenReturn(user);
@@ -97,8 +97,8 @@ public class UserControllerTest {
 
     @Test
     public void unfollowTest() throws Exception {
-        User u = TestUtil.generateMockUser();
-        User utf = TestUtil.generateMockUser();
+        User u = TestUtil.generateMockUser(UUID.randomUUID());
+        User utf = TestUtil.generateMockUser(UUID.randomUUID());
         FollowDto followDto = TestUtil.generateFollowDto(u, utf);
 
         doNothing().when(userService).unfollow(any());
