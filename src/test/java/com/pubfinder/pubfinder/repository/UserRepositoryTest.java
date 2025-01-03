@@ -33,9 +33,9 @@ public class UserRepositoryTest {
   @Transactional
   @Test
   public void saveAndGetUserWithFollowingTest() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
     for (int i = 0; i<3;i++) {
-      User mockUser = TestUtil.generateMockUser();
+      User mockUser = TestUtil.generateMockUser(null);
       userRepository.save(mockUser);
       savedUser.addFollowing(mockUser);
     }
@@ -55,7 +55,7 @@ public class UserRepositoryTest {
 
   @Test
   public void saveAndGetUserByUsernameTest() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
     Optional<User> foundUser = userRepository.findByUsername(savedUser.getUsername());
 
     assertTrue(foundUser.isPresent());
@@ -69,7 +69,7 @@ public class UserRepositoryTest {
 
   @Test
   public void saveAndGetUserByEmailTest() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
     Optional<User> foundUser = userRepository.findByEmail(savedUser.getEmail());
 
     assertTrue(foundUser.isPresent());
@@ -83,7 +83,7 @@ public class UserRepositoryTest {
 
   @Test
   public void deleteUserTest() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
 
     userRepository.delete(savedUser);
     Optional<User> user = userRepository.findById(savedUser.getId());
@@ -92,8 +92,8 @@ public class UserRepositoryTest {
 
   @Test
   public void followAndDeleteUserTest() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
-    User savedUser2 = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
+    User savedUser2 = userRepository.save(TestUtil.generateMockUser(null));
 
     savedUser.addFollowing(savedUser2);
     userRepository.save(savedUser);   // Save updated user with following relationship
@@ -114,7 +114,7 @@ public class UserRepositoryTest {
 
   @Test
   public void editUser() {
-    User savedUser = userRepository.save(TestUtil.generateMockUser());
+    User savedUser = userRepository.save(TestUtil.generateMockUser(null));
     savedUser.setFirstname("something else");
     User editedUser = userRepository.save(savedUser);
     assertEquals(savedUser, editedUser);

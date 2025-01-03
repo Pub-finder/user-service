@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public class TestUtil {
 
-  public static User generateMockUser() {
+  public static User generateMockUser(UUID id) {
     return User.builder()
-        .id(null)
+        .id(id)
         .firstname("firstName")
         .lastname("lastName")
         .email("email")
@@ -38,6 +38,7 @@ public class TestUtil {
 
   public static Token generateMockToken(User user) {
     return Token.builder()
+        .id(null)
         .token("token")
         .tokenType(TokenType.BEARER)
         .expired(false)
