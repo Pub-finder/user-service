@@ -11,7 +11,6 @@ import com.pubfinder.pubfinder.models.Token;
 import com.pubfinder.pubfinder.models.User;
 import com.pubfinder.pubfinder.util.TestUtil;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -165,7 +164,6 @@ public class UserServiceTest {
 
     @Test
     public void followTest_NotFound() {
-        User user = TestUtil.generateMockUser(UUID.randomUUID());
         User utf = TestUtil.generateMockUser(UUID.randomUUID());
 
         FollowDto followDto = FollowDto.builder()
@@ -179,8 +177,6 @@ public class UserServiceTest {
 
     @Test
     public void getFollowers() throws ResourceNotFoundException {
-        User user = TestUtil.generateMockUser(UUID.randomUUID());
-
         for (int i = 0; i < 10; i++) {
             user.getFollowers().add(TestUtil.generateMockUser(UUID.randomUUID()));
         }
@@ -193,7 +189,6 @@ public class UserServiceTest {
 
     @Test
     public void getFollowers_NotFound() {
-        User user = TestUtil.generateMockUser(UUID.randomUUID());
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.getFollowers(user.getId()));
     }
